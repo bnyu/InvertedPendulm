@@ -67,6 +67,6 @@ def animated(y):
         return (line_wheel_left, line_wheel_right, line_cart_bottom, line_cart_top,
                 line_cart_left, line_cart_right, line_hinge, line_pendulum)
 
-    ani = animation.FuncAnimation(fig, animate, frames=1000, interval=20, blit=True, init_func=None)
+    ani = animation.FuncAnimation(fig, animate, frames=1000, interval=2, blit=True, init_func=None)
     plt.show(ani)
 
