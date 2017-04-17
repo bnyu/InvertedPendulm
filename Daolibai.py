@@ -1,7 +1,9 @@
 import numpy as np
 import math
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+matplotlib.use('TkAgg')
 
 
 # 作轨迹图
@@ -65,8 +67,8 @@ def animated(y):
         line_pendulum.set_data([(y[ii, 2], y[ii, 2] + pendulum_x),
                                 (wheel_radius + cart_high, wheel_radius + cart_high + pendulum_y)])
         return (line_wheel_left, line_wheel_right, line_cart_bottom, line_cart_top,
-                line_wheel_left, line_cart_right, line_hinge, line_pendulum)
+                line_cart_left, line_cart_right, line_hinge, line_pendulum)
 
-    ani = animation.FuncAnimation(fig, animate, frames=1000, interval=20, init_func=None)
+    ani = animation.FuncAnimation(fig, animate, frames=1000, interval=2, blit=True, init_func=None)
     plt.show(ani)
 
