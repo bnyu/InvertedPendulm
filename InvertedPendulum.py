@@ -25,23 +25,18 @@ def track(y, t, rd, step):
     plt.subplot(2, 3, 1)
     plt.plot(time, angle)
     plt.title('Pendulum Angle')
-
     plt.subplot(2, 3, 4)
     plt.plot(time, angle_velocity)
     plt.title('Angular Velocity')
-
     plt.subplot(2, 3, 2)
     plt.plot(time, position)
     plt.title('Cart Position')
-
     plt.subplot(2, 3, 5)
     plt.plot(time, velocity)
     plt.title('Cart Velocity')
-
     plt.subplot(2, 3, 3)
     plt.plot(time, rd)
     plt.title('Random Disturbing')
-
     plt.subplot(2, 3, 6)
     plt.plot(time, s)
     plt.title('Step signal')
@@ -161,7 +156,7 @@ def calculate(a, b):
 
 
 def control(k):
-    print('\n初始摆杆角度：-15度\n初始摆杆角速度：-1.5度/秒\n初始小车位置：2.5米\n初始小车速度：-1.5米/秒')
+    print('\n初始摆杆角度：-15度\n初始摆杆角速度：-1.5弧度/秒\n初始小车位置：2.5米\n初始小车速度：-1.5米/秒')
     if input('是否默认初始倒立摆状态：Enter/n') != 'n':
         x1 = -15.0/180 * np.pi
         x2 = -1.5
