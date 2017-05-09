@@ -1,6 +1,95 @@
 import numpy as np
 from sympy import *
-import Daolibai as Dao
+import math
+import random
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+matplotlib.use('TkAgg')
+
+
+# 作轨迹图
+def track(y, t, rd, step):
+    if t==2000:
+        t-=1
+    time = np.arange(0, t+1)
+    s = np.zeros(t+1)
+    if step!=0:
+        for j in range(step, t+1):
+            s[j]=0.5
+    angle = y[:, 0]
+    angle_velocity = y[:, 1]
+    position = y[:, 2]
+    velocity = y[:, 3]
+    fig, ax = plt.subplots(nrows=2, ncols=3)
+    plt.subplot(2, 3, 1)
+    plt.plot(time, angle)
+    plt.title('Pendulum Angle')
+
+    plt.subplot(2, 3, 4)
+    plt.plot(time, angle_velocity)
+    plt.title('Angular Velocity')
+
+    plt.subplot(2, 3, 2)
+    plt.plot(time, position)
+    plt.title('Cart Position')
+
+    plt.subplot(2, 3, 5)
+    plt.plot(time, velocity)
+    plt.title('Cart Velocity')
+
+    plt.subplot(2, 3, 3)
+    plt.plot(time, rd)
+    plt.title('Random Disturbing')
+
+    plt.subplot(2, 3, 6)
+    plt.plot(time, s)
+    plt.title('Step signal')
+    plt.show(fig)
+
+
+# 作动画
+def animated(y, t):
+    cart_high = 3
+    cart_width = 5
+    length = 5.5
+    wheel_radius = 0.5
+    hinge_radius = 0.08
+    circle = np.arange(0, 2*np.pi, np.pi/100)
+    wheel = [wheel_radius*np.sin(circle), wheel_radius*np.cos(circle)]
+    hinge = [hinge_radius*np.sin(circle), hinge_radius*np.cos(circle)]
+    fig = plt.figure()
+    ax = plt.axes(xlim=(-5, 5), ylim=(0, 10))
+    line_wheel_left, = ax.plot([], [], lw=2, color='g')
+    line_wheel_right, = ax.plot([], [], lw=2, color='g')
+    line_cart_left, = ax.plot([], [], lw=2, color='k')
+    line_cart_right, = ax.plot([], [], lw=2, color='k')
+    line_cart_top, = ax.plot([], [], lw=2, color='k')
+    line_cart_bottom, = ax.plot([], [], lw=2, color='k')
+    line_hinge, = ax.plot([], [], lw=4, color='y')
+    line_pendulum, = ax.plot([], [], lw=5, color='y')
+
+    def animate(ii):
+        line_wheel_left.set_data(y[ii, 2] + wheel[0] - cart_width/3, wheel[1] + wheel_radius)
+        line_wheel_right.set_data(y[ii, 2] + wheel[0] + cart_width/3, wheel[1] + wheel_radius)
+        line_cart_bottom.set_data([(y[ii, 2] - cart_width/2, y[ii, 2] + cart_width/2),
+                                   (wheel_radius, wheel_radius)])
+        line_cart_top.set_data([(y[ii, 2] - cart_width/2, y[ii, 2] + cart_width/2),
+                                (wheel_radius + cart_high, wheel_radius + cart_high)])
+        line_cart_left.set_data([(y[ii, 2] - cart_width/2, y[ii, 2] - cart_width/2),
+                                 (wheel_radius, wheel_radius + cart_high)])
+        line_cart_right.set_data([(y[ii, 2] + cart_width/2, y[ii, 2] + cart_width/2),
+                                  (wheel_radius, wheel_radius + cart_high)])
+        line_hinge.set_data(y[ii, 2] + hinge[0], wheel_radius + cart_high + hinge[1])
+        pendulum_x = length*math.sin(y[ii, 0])
+        pendulum_y = length*math.cos(y[ii, 0])
+        line_pendulum.set_data([(y[ii, 2], y[ii, 2] + pendulum_x),
+                                (wheel_radius + cart_high, wheel_radius + cart_high + pendulum_y)])
+        return (line_wheel_left, line_wheel_right, line_cart_bottom, line_cart_top,
+                line_cart_left, line_cart_right, line_hinge, line_pendulum)
+
+    ani = animation.FuncAnimation(fig, animate, frames=t, interval=5, blit=True, init_func=None)
+    plt.show(ani)
 
 
 def model():
@@ -72,10 +161,10 @@ def calculate(a, b):
 
 
 def control(k):
-    print('\n初始摆杆角度：-15度\n初始摆杆角速度：-2度/秒\n初始小车位置：2.5米\n初始小车速度：-1.5米/秒')
+    print('\n初始摆杆角度：-15度\n初始摆杆角速度：-1.5度/秒\n初始小车位置：2.5米\n初始小车速度：-1.5米/秒')
     if input('是否默认初始倒立摆状态：Enter/n') != 'n':
         x1 = -15.0/180 * np.pi
-        x2 = -2.0
+        x2 = -1.5
         x3 = 2.5
         x4 = -1.5
     else:
@@ -88,22 +177,45 @@ def control(k):
     z = np.zeros((4, 1))
     f = x
     dt = 0.01
-    print('\n正在进行状态反馈控制...')
-    for i in range(1, 1000):
-        f = f + (np.dot((A - (np.dot(B, k))), (f - z))) * dt
+    time = 2000
+    sign = True
+    rd = np.array([0])
+    if input('\n是否产生随机干扰信号：Enter/n') != 'n':
+        d = 1
+        sign = False
+    else:
+        d = 0
+    s = np.zeros(2000)
+    step = 0
+    if input('\n是否在随机时间产生阶跃信号：Enter/n') != 'n':
+        step = random.randint(800, 1000)
+        for j in range(step, 1000):
+            s[j] = 0.4
+        sign = False
+    print('\n正在进行状态反馈动态控制...')
+    for i in range(1, 2000):
+        if i%2==0:
+            r = random.uniform(-0.04, 0.04) * d
+        else:
+            r = 0
+        rd = np.vstack((rd, r))
+        f = f + (np.dot((A - (np.dot(B, k))), (f - z + r + s[i]))) * dt
         y = np.vstack((y, f.T))
-    return y
+        if (sign) and (abs(f[0])<1e-2 and abs(f[1])<1e-2 and abs(f[2])<1e-2 and abs(f[3])<1e-2):
+            time = i
+            break
+    return y, time, rd, step
 
 
 print('Start')
 while(True):
     A, B = model()
     K = calculate(A, B)
-    Y = control(K)
+    Y, T, Rd, Step = control(K)
     if input('\n是否作动画：Enter/n') != 'n':
-        Dao.animated(Y)
+        animated(Y, T)
     if input('\n是否作轨迹图：Enter/n') != 'n':
-        Dao.track(Y)
+        track(Y, T, Rd, Step)
     if input('\n是否继续：Enter/n') == 'n':
         print('End')
         break
