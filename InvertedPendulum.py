@@ -16,7 +16,7 @@ def track(y, t, rd, step):
     s = np.zeros(t+1)
     if step!=0:
         for j in range(step, t+1):
-            s[j]=0.5
+            s[j]=4
     angle = y[:, 0]
     angle_velocity = y[:, 1]
     position = y[:, 2]
@@ -161,7 +161,7 @@ def calculate(a, b):
 
 
 def control(k):
-    print('\n初始摆杆角度：-15度\n初始摆杆角速度：-1.5度/秒\n初始小车位置：2.5米\n初始小车速度：-1.5米/秒')
+    print('\n初始摆杆角度：-15度\n初始摆杆角速度：-1.5弧度/秒\n初始小车位置：2.5米\n初始小车速度：-1.5米/秒')
     if input('是否默认初始倒立摆状态：Enter/n') != 'n':
         x1 = -15.0/180 * np.pi
         x2 = -1.5
@@ -175,7 +175,6 @@ def control(k):
     x = np.array([[x1], [x2], [x3], [x4]])
     y = x.T
     z = np.zeros((4, 1))
-    f = x
     dt = 0.01
     time = 2000
     sign = True
@@ -190,18 +189,18 @@ def control(k):
     if input('\n是否在随机时间产生阶跃信号：Enter/n') != 'n':
         step = random.randint(800, 1000)
         for j in range(step, 1000):
-            s[j] = 0.4
+            s[j] = 4
         sign = False
     print('\n正在进行状态反馈动态控制...')
     for i in range(1, 2000):
-        if i%2==0:
-            r = random.uniform(-0.04, 0.04) * d
+        if (not sign) and i%3==0:
+            r = random.uniform(-0.5, 0.5) * d
         else:
             r = 0
         rd = np.vstack((rd, r))
-        f = f + (np.dot((A - (np.dot(B, k))), (f - z + r + s[i]))) * dt
-        y = np.vstack((y, f.T))
-        if (sign) and (abs(f[0])<1e-2 and abs(f[1])<1e-2 and abs(f[2])<1e-2 and abs(f[3])<1e-2):
+        x = x + ((np.dot((A - (np.dot(B, k))), (x - z))) + np.dot(B, r+s[i])) * dt
+        y = np.vstack((y, x.T))
+        if (sign) and (abs(x[0])<1e-2 and abs(x[1])<1e-2 and abs(x[2])<1e-2 and abs(x[3])<1e-2):
             time = i
             break
     return y, time, rd, step
