@@ -25,23 +25,18 @@ def track(y, t, rd, step):
     plt.subplot(2, 3, 1)
     plt.plot(time, angle)
     plt.title('Pendulum Angle')
-
     plt.subplot(2, 3, 4)
     plt.plot(time, angle_velocity)
     plt.title('Angular Velocity')
-
     plt.subplot(2, 3, 2)
     plt.plot(time, position)
     plt.title('Cart Position')
-
     plt.subplot(2, 3, 5)
     plt.plot(time, velocity)
     plt.title('Cart Velocity')
-
     plt.subplot(2, 3, 3)
     plt.plot(time, rd)
     plt.title('Random Disturbing')
-
     plt.subplot(2, 3, 6)
     plt.plot(time, s)
     plt.title('Step signal')
