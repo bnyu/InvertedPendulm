@@ -94,12 +94,12 @@ def model():
         pendulum_mass = 0.1
         pendulum_length = 2.0
     else:
-        cart_mass = min(2.0, max(0.5, float(input('请输入小车质量：'))))
-        pendulum_mass = min(0.2, max(0.05, float(input('请输入摆杆质量：'))))
-        pendulum_length = min(4.0, max(1.0, float(input('请输入摆杆长度：'))))
+        cart_mass = 0.5*min(3, max(1, int(input('请选择小车质量：1:(0.5kg)，2:(1.0kg)，3:(2.0kg)'))))
+        pendulum_mass = 0.05*min(3, max(1, int(input('请选择摆杆质量：1:(0.05kg)，2:(0.1kg)，3:(0.2kg)'))))
+        pendulum_length = 1.0*min(3, max(1, int(input('请选择摆杆长度：1:(1.0m)，2:(2.0m)，3:(4.0m)'))))
     gravity = 9.81
     a21 = (cart_mass + pendulum_mass) * gravity / (cart_mass * pendulum_length / 2)
-    a41 = pendulum_mass * gravity / cart_mass
+    a41 = - pendulum_mass * gravity / cart_mass
     b21 = -1 / (cart_mass * pendulum_length / 2)
     b41 = 1 / cart_mass
     a = np.array([[0, 1, 0, 0], [a21, 0, 0, 0], [0, 0, 0, 1], [a41, 0, 0, 0]])
@@ -136,21 +136,10 @@ def calculate(a, b):
     print('\n正在计算状态反馈矩阵...')
     s1 = Matrix.det(ri - (Matrix(a) - Matrix(b) * Matrix(kr)))
     kr = solve(s1 - s2, [k1, k2, k3, k4])
-    # 一般情况程序都能求解出
-    if type(kr[k1]) == Symbol:
-        print('未能解出反馈矩阵')
-        print(kr)
-        if input('是否手动求解：Enter/n') == 'n':
-            exit(1)
-        k_1 = float(input('请输入反馈系数k1：'))
-        k_2 = float(input('请输入反馈系数k2：'))
-        k_3 = float(input('请输入反馈系数k3：'))
-        k_4 = float(input('请输入反馈系数k4：'))
-    else:
-        k_1 = kr[k1].evalf()
-        k_2 = kr[k2].evalf()
-        k_3 = kr[k3].evalf()
-        k_4 = kr[k4].evalf()
+    k_1 = kr[k1].evalf()
+    k_2 = kr[k2].evalf()
+    k_3 = kr[k3].evalf()
+    k_4 = kr[k4].evalf()
     kf = np.array([[k_1, k_2, k_3, k_4]])
     print("状态反馈矩阵：", kf)
     return kf
