@@ -94,12 +94,12 @@ def model():
         pendulum_mass = 0.1
         pendulum_length = 2.0
     else:
-        cart_mass = min(2.0, max(0.5, float(input('请输入小车质量(0.5kg--2kg)：'))))
-        pendulum_mass = min(0.2, max(0.05, float(input('请输入摆杆质量(0.05kg--0.2kg)：'))))
-        pendulum_length = min(4.0, max(1.0, float(input('请输入摆杆长度(1m--4m)：'))))
+        cart_mass = min(2.0, max(0.5, float(input('请输入小车质量：'))))
+        pendulum_mass = min(0.2, max(0.05, float(input('请输入摆杆质量：'))))
+        pendulum_length = min(4.0, max(1.0, float(input('请输入摆杆长度：'))))
     gravity = 9.81
     a21 = (cart_mass + pendulum_mass) * gravity / (cart_mass * pendulum_length / 2)
-    a41 = -pendulum_mass * gravity / cart_mass
+    a41 = pendulum_mass * gravity / cart_mass
     b21 = -1 / (cart_mass * pendulum_length / 2)
     b41 = 1 / cart_mass
     a = np.array([[0, 1, 0, 0], [a21, 0, 0, 0], [0, 0, 0, 1], [a41, 0, 0, 0]])
@@ -136,6 +136,7 @@ def calculate(a, b):
     print('\n正在计算状态反馈矩阵...')
     s1 = Matrix.det(ri - (Matrix(a) - Matrix(b) * Matrix(kr)))
     kr = solve(s1 - s2, [k1, k2, k3, k4])
+    # 一般情况程序都能求解出
     if type(kr[k1]) == Symbol:
         print('未能解出反馈矩阵')
         print(kr)
