@@ -85,7 +85,7 @@ def animated(y, t):
                 line_cart_left, line_cart_right, line_hinge, line_pendulum)
 
     ani = animation.FuncAnimation(fig, animate, frames=t, interval=5, blit=True, init_func=None)
-    ani.save('line.mp4', fps=100)
+    # ani.save('line.mp4', fps=100)
     plt.show(ani)
 
 
