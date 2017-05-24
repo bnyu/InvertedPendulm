@@ -6,11 +6,6 @@ import matplotlib.pyplot as plt
 matplotlib.use('TkAgg')
 
 
-# 因为[]中有数字会被识别为引用,故用zero,one 代替0,1
-zero = 0
-one = 1
-
-
 # 对比轨迹图
 def track(y1, y2, y3, t):
     time = np.arange(0, t)
@@ -68,8 +63,8 @@ def model():
     a41 = - pendulum_mass * gravity / cart_mass
     b21 = -1 / (cart_mass * pendulum_length / 2)
     b41 = 1 / cart_mass
-    a = np.array([[zero, 1, 0, 0], [a21, 0, 0, 0], [zero, 0, 0, 1], [a41, 0, 0, 0]])
-    b = np.array([[zero], [b21], [zero], [b41]])
+    a = np.array([[0, 1, 0, 0], [a21, 0, 0, 0], [0, 0, 0, 1], [a41, 0, 0, 0]])
+    b = np.array([[0], [b21], [0], [b41]])
     return a, b
 
 
@@ -122,7 +117,7 @@ def control(a, b, k, x):
     z = np.zeros((4, 1))
     dt = 0.01
     times = 2000
-    rd = np.array([zero])
+    rd = np.array([0])
     for jr in range(1, times):
         r = 0.0
         if jr % 4 == 0:
