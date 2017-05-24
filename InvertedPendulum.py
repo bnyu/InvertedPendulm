@@ -12,9 +12,9 @@ matplotlib.use('TkAgg')
 def track(y, t, rd, step1, step0, size=2.0):
     time = np.arange(0, t)
     s = np.zeros(t)
-    if step1!=0:
+    if step1 != 0:
         for j in range(step1, step0):
-            s[j]=size
+            s[j] = size
     angle = y[:, 0]
     angle_velocity = y[:, 1]
     position = y[:, 2]
@@ -63,8 +63,10 @@ def animated(y, t):
     line_pendulum, = ax.plot([], [], lw=5, color='y')
 
     def animate(ii):
-        line_wheel_left.set_data(y[ii, 2] + wheel[0] - cart_width/3, wheel[1] + wheel_radius)
-        line_wheel_right.set_data(y[ii, 2] + wheel[0] + cart_width/3, wheel[1] + wheel_radius)
+        line_wheel_left.set_data(y[ii, 2] + wheel[0] - cart_width/3,
+                                 wheel[1] + wheel_radius)
+        line_wheel_right.set_data(y[ii, 2] + wheel[0] + cart_width/3,
+                                  wheel[1] + wheel_radius)
         line_cart_bottom.set_data([(y[ii, 2] - cart_width/2, y[ii, 2] + cart_width/2),
                                    (wheel_radius, wheel_radius)])
         line_cart_top.set_data([(y[ii, 2] - cart_width/2, y[ii, 2] + cart_width/2),
@@ -83,6 +85,7 @@ def animated(y, t):
                 line_cart_left, line_cart_right, line_hinge, line_pendulum)
 
     ani = animation.FuncAnimation(fig, animate, frames=t, interval=5, blit=True, init_func=None)
+    ani.save('line.mp4', fps=100)
     plt.show(ani)
 
 
@@ -93,12 +96,12 @@ def model():
         pendulum_mass = 0.1
         pendulum_length = 2.0
     else:
-        cart_mass = (0.5*min(3, max(1, int
-        (input('请选择小车质量：1:(0.5kg)，2:(1.0kg)，3:(1.5kg)，4:(2.0kg)')))))
-        pendulum_mass = (0.05*min(3, max(1, int
-        (input('请选择摆杆质量：1:(0.05kg)，2:(0.1kg)，3:(0.15kg)，4:(0.2kg)')))))
-        pendulum_length = (1.0*min(3, max(1, int
-        (input('请选择摆杆长度：1:(1.0m)，2:(2.0m)，3:(3m)，4:(4.0m)')))))
+        cart_mass = (0.5*min(3, max(1, int(
+            input('请选择小车质量：1:(0.5kg)，2:(1.0kg)，3:(1.5kg)，4:(2.0kg)')))))
+        pendulum_mass = (0.05*min(3, max(1, int(
+            input('请选择摆杆质量：1:(0.05kg)，2:(0.1kg)，3:(0.15kg)，4:(0.2kg)')))))
+        pendulum_length = (1.0*min(3, max(1, int(
+            input('请选择摆杆长度：1:(1.0m)，2:(2.0m)，3:(3m)，4:(4.0m)')))))
     gravity = 9.81
     a21 = (cart_mass + pendulum_mass) * gravity / (cart_mass * pendulum_length / 2)
     a41 = - pendulum_mass * gravity / cart_mass
@@ -110,7 +113,7 @@ def model():
 
 
 def calculate(a, b):
-    print('A=' ,a)
+    print('A=', a)
     print('B=', b)
     c = np.eye(4)
     print('C=', c)
@@ -152,7 +155,8 @@ def calculate(a, b):
     else:
         f = min(5.0, max(-5.0, float(input('请输入阶跃大小：'))))
     dt = 0.01
-    times = 200
+    # 简易模型没有考虑摆杆向下情况
+    times = 150
     rd = np.zeros(times)
     for i in range(1, times):
         x = x + (np.dot(a, x) + np.dot(b, [[f]])) * dt
@@ -188,7 +192,7 @@ def calculate(a, b):
     x = np.array([[0.0], [0.0], [0.0], [0.0]])
     z = np.zeros((4, 1))
     y = x.T
-    times = 2000
+    times = 1000
     rd = np.zeros(times)
     for i2 in range(1, times):
         x = x + ((np.dot((a - (np.dot(b, kf))), x-z)) + np.dot(b, [[f]])) * dt
@@ -197,27 +201,26 @@ def calculate(a, b):
         track(y, times, rd, 1, times, f)
     if input('\n是否动画演示：Enter/n') != 'n':
         animated(y, times)
-
     return kf
 
 
 def control(k):
-    print('\n初始摆杆角度：-15度\n初始摆杆角速度：-1.5度/秒\n'
-          '初始小车位置：2.5米\n初始小车速度：-1.5米/秒')
+    print('\n初始摆杆角度：-15度\n初始摆杆角速度：-5度/秒\n'
+          '初始小车位置：7.5米\n初始小车速度：-3.5米/秒')
     if input('是否默认初始倒立摆状态：Enter/n') != 'n':
-        x1 = -15.0/180 * np.pi
-        x2 = -1.5/180 * np.pi
-        x3 = 2.5
-        x4 = -1.5
+        x1 = -15.0 / 180 * np.pi
+        x2 = -5.0 / 180 * np.pi
+        x3 = 7.5
+        x4 = -3.5
     else:
         x1 = min(20.0, max(-20.0, float(
             input('请输入初始摆杆角度(绝对值小于20度)：')))) / 180 * np.pi
-        x2 = min(2.0, max(-2.0, float(
-            input('请输入初始摆杆角速度(绝对值小于2度/秒)：')))) / 180 * np.pi
+        x2 = min(10.0, max(-10.0, float(
+            input('请输入初始摆杆角速度(绝对值小于10度/秒)：')))) / 180 * np.pi
         x3 = min(10.0, max(-10.0, float(
             input('请输入初始小车位置(绝对值小于10米)：'))))
-        x4 = min(2.0, max(-2.0, float(
-            input('请输入初始小车速度(绝对值小于2米/秒)：'))))
+        x4 = min(30.0, max(-30.0, float(
+            input('请输入初始小车速度(绝对值小于30米/秒)：'))))
     x = np.array([[x1], [x2], [x3], [x4]])
     y = x.T
     z = np.zeros((4, 1))
@@ -227,19 +230,20 @@ def control(k):
     if input('\n是否产生随机干扰信号：Enter/n') != 'n':
         for jr in range(1, times):
             r = 0.0
-            if jr%4==0:
+            if jr % 4 == 0:
                 r = random.uniform(-0.6, 0.6)
             rd = np.vstack((rd, r))
     else:
         rd = np.zeros(times)
     s = np.zeros(times)
     step1 = 0
-    if input('\n是否默认阶跃大小为3N：Enter/n') != 'n':
-        size = 3.0
-    else:
-        size = min(5.0, max(-5.0, float(input('请输入阶跃大小：'))))
     step0 = times
+    size = 0.0
     if input('\n是否在随机一段时间产生方波推力：Enter/n') != 'n':
+        if input('\n是否默认阶跃大小为3N：Enter/n') != 'n':
+            size = 3.0
+        else:
+            size = min(5.0, max(-5.0, float(input('请输入阶跃大小：'))))
         step1 = random.randint(700, 800)
         step0 = random.randint(1000, 1200)
         for j in range(step1, step0):
@@ -251,8 +255,9 @@ def control(k):
     return y, rd, step1, step0, times, size
 
 
+
 print('Start')
-while(True):
+while (True):
     A, B = model()
     K = calculate(A, B)
     Y, Rd, Step1, Step0, T, Size = control(K)
@@ -263,7 +268,4 @@ while(True):
     if input('\n是否继续：Enter/n') == 'n':
         print('End')
         break
-    
-    
-
 
